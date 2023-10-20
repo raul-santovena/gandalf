@@ -1,0 +1,21 @@
+{
+    "model": {
+        "model_name": "CAE",
+        "model_id": "20231016_131604",
+        "base_dir": "../train/results",
+        "X_filename": "X_test.npy",
+        "params_filename": "params_test.npy",
+        "cond_params_filename": "cond_params_test.npy",
+        "z_filename": "z_test.npy",
+        "decoded_filename": "decoded_test.npy",
+        "ids_filename": "ids_test.npy",
+        "axis_labels_filename": "axis_labels.npy",
+        "params_names_filename": "params_names.npy",
+        "cond_params_names_filename": "cond_params_names.npy",
+        "X_scaler_filename" : "X_scaler.pkl",
+        "param_scaler_filename" : "param_scaler.pkl"
+    },
+    "info": {
+        "version": 1.0
+    }
+}

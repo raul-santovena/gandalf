@@ -1,0 +1,44 @@
+[project]
+name = "gandalf"
+
+version = "1.0.0"
+
+description = "Generative Adversarial Networks for Disentangling and Learning Framework"
+
+readme = "README.md"
+
+requires-python = ">=3.7"
+
+license = {file = "LICENSE.txt"}
+
+authors = [
+  {name = "Raúl Santoveña Gómez", email = "santovena.raul@gmail.com" } 
+]
+
+maintainers = [
+  {name = "Raúl Santoveña Gómez", email = "santovena.raul@gmail.com" } 
+]
+
+dependencies = [
+  "numpy",
+  "pandas",
+  "scikit-learn",
+  "tensorflow",
+  "bokeh",
+  "selenium"
+]
+
+[project.urls]  
+"Homepage" = "https://github.com/raul-santovena/gandalf"
+
+[project.scripts]  
+train_cli = "gandalf.train.train_cli:cli"
+test_cli = "gandalf.train.test_cli:cli"
+
+[tool.setuptools]
+packages = ["gandalf.train"]
+package-data = {"gandalf.train" = ["data/sample/*.npy"]}
+
+[build-system]
+requires = ["setuptools>=43.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
