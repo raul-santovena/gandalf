@@ -6,7 +6,7 @@ Before training, it is necessary to prepare data in a specific format. We ilustr
 - `X.npy`: a bi-dimensional numpy array which represents the main input data (in this case the spectra data). Each row represent a single sample (spectrum).
 - `params.npy`: a bi-dimensional numpy array which represent parameters associated with the main data (in this case astrophysical parameters like temperature and gravity). Each row represent a single sample.
 - `ids.npy`: a one-dimensional numpy array which represent the identifiers of each sample.
-- `x_axis_labels`: a one-dimensional numpy array that represents the different axis values of the data (in this case it would be the different wavelength values).
+- `axis_labels.npy`: a one-dimensional numpy array that represents the different axis values of the data (in this case it would be the different wavelength values).
 
 ## Defining and training models
 To create and train a model, use the command line tool `train_cli.py`. Through this tool you can configure the different parameters of the model and its training, as well as parameters related to the data to be used and their format. To see a description of each of them, use the `--help` flag as follow:
