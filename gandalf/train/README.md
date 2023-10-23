@@ -1,8 +1,15 @@
 # Train module
 This module allows you to define, train and test disentangling models. An example data set is available in train/data/sample to test its operation.
 
+## Data format
+Before training, it is necessary to prepare data in a specific format. We ilustrate this step using the sample data allocated in this repository, which is based on [APOGEE](https://www.sdss4.org/dr17/irspec/) data. All datasets must have 4 files:
+- `X.npy`: a bi-dimensional numpy array which represents the main input data (in this case the spectra data). Each row represent a single sample (spectrum).
+- `params.npy`: a bi-dimensional numpy array which represent parameters associated with the main data (in this case astrophysical parameters like temperature and gravity). Each row represent a single sample.
+- `ids.npy`: a one-dimensional numpy array which represent the identifiers of each sample.
+- `x_axis_labels`: a one-dimensional numpy array that represents the different axis values of the data (in this case it would be the different wavelength values).
+
 ## Defining and training models
-To create and train a model, use the command line tool train_cli.py. Through this tool you can configure the different parameters of the model and its training, as well as parameters related to the data to be used and their format. To see a description of each of them, use the --help flag as follow:
+To create and train a model, use the command line tool `train_cli.py`. Through this tool you can configure the different parameters of the model and its training, as well as parameters related to the data to be used and their format. To see a description of each of them, use the `--help` flag as follow:
 ```
 > python .\gandalf\train\train_cli.py --help
 usage: train_cli [-h] [--survey {sample}]
@@ -99,7 +106,7 @@ During the course and completion of training, several useful folders and files a
 For each new model, an id is generated that can later be used for visualization. More details in [gandalf/gandalf/visualization/README.md](../visualization/README.md)
 
 ## Testing disentangling
-Once a model is created and trained, various tests can be performed to check its effectiveness. This is done with the command line tool test_cli.py. To see a description of each of the options, use the --help flag:
+Once a model is created and trained, various tests can be performed to check its effectiveness. This is done with the command line tool `test_cli.py`. To see a description of each of the options, use the `--help` flag:
 ```
 > python .\gandalf\train\test_cli.py --help 
 usage: test_cli [-h] [--model_names name [name ...]] [--seed SEED] [-v]
