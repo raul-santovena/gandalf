@@ -213,14 +213,14 @@ for _cond_param_name in cond_params_names:
 _X = np.array(df.X.values[0])
 y_range_min = np.min(_X) if X_scaler is None else np.min(X_scaler.inverse_transform(_X.reshape(1, -1)))
 y_range_max = np.max(_X) if X_scaler is None else np.max(X_scaler.inverse_transform(_X.reshape(1, -1)))
-f1 = figure(width=18, height=3, sizing_mode='scale_both', tools=['pan', 'box_zoom', 'xwheel_zoom', 'reset'],
+f1 = figure(width=18, height=3, sizing_mode='stretch_both', tools=['pan', 'box_zoom', 'xwheel_zoom', 'reset'],
             y_range=(y_range_min, y_range_max), output_backend='webgl')
 f1.line(x='axis_labels', y='X', source=X_source, line_color='#ECA400', line_width=2)
 f1.toolbar.autohide=True
 
 
 ## Plot latent
-f2 = figure(width=18, height=3, sizing_mode='scale_both', tools='', output_backend='webgl')
+f2 = figure(width=18, height=3, sizing_mode='stretch_both', tools='', output_backend='webgl')
 f2.line(x='z_axis_labels', y ='z', source=z_source)
 f2.circle(x='z_axis_labels', y ='z', source=z_source, size=8, line_color='navy', fill_color='orange', fill_alpha=1)
 
@@ -230,7 +230,7 @@ f2.toolbar.autohide=True
 
 ## Plot decoded spectrum
 f3 = figure(width=18, height=3, x_range=f1.x_range, y_range=f1.y_range,
-            sizing_mode='scale_both', output_backend='webgl')
+            sizing_mode='stretch_both', output_backend='webgl')
 f3.line(x='axis_labels', y='comparison_X', source=X_source, line_color='#D5573B', line_width=2,
         legend_label='original')
 f3.line(x='axis_labels', y='generated_X', source=X_source, line_color='#61988E', line_width=2,
@@ -556,9 +556,9 @@ f2.on_event('pan', on_pan)
 #######################
 
 # Layout definition #
-layout_ = column(row([search_text_input, ids_select] + list(selects_y_dict.values())),
-                 row(f1),
-                 row(column([z_slider] + list(sliders_cond_params_dict.values()) + [reset_button]), f2), 
+layout_ = column(row([search_text_input, ids_select] + list(selects_y_dict.values()), sizing_mode='scale_width'),
+                 row(f1, sizing_mode='stretch_both'),
+                 row(column([z_slider] + list(sliders_cond_params_dict.values()) + [reset_button], sizing_mode='stretch_height'), f2, sizing_mode='stretch_both'), 
                  f3, sizing_mode='stretch_both')
 
 curdoc().add_root(layout_)
