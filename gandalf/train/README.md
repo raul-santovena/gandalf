@@ -8,6 +8,8 @@ Before training, it is necessary to prepare data in a specific format. We ilustr
 - `ids.npy`: a one-dimensional numpy array which represent the identifiers of each sample.
 - `axis_labels.npy`: a one-dimensional numpy array that represents the different axis values of the data (in this case it would be the different wavelength values).
 
+The complete APOGEE dataset is available for the community in [Kaggle](https://www.kaggle.com/datasets/raulsantovena/apogee/).
+
 ## Defining and training models
 To create and train a model, use the command line tool `train_cli.py`. Through this tool you can configure the different parameters of the model and its training, as well as parameters related to the data to be used and their format. To see a description of each of them, use the `--help` flag as follow:
 ```
