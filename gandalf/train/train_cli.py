@@ -63,27 +63,28 @@ def get_model_command_line(model_id, results_file_path, verbose=0):
     args_dict['disc_hidden_layers'] = _row.disc_hidden_layers.replace("[","").replace("]","").replace(",","")
 
 
-    model_command_line = ('python train_test_models.py --training_id {model_id} ' +
-    '--survey {survey} --survey_data_path {survey_data_path} ' + 
+    model_command_line = ('train_cli.py --training_id {model_id} ' +
+    '--data_loader {data_loader} --survey_data_path {survey_data_path} --root_folder {root_folder} ' + 
     '--params {labels} --cond_params {cond_labels} ' +
     # Data parameters
-    '{_normalize}{_shuffle}{_discretize}--nbins {nbins} --batch_size {batch_size} --seed {seed} ' +
+    '{_normalize}{_shuffle}{_discretize}--nbins {nbins} --batch_size {batch_size} {_seed}' +
     # Model parameters
-    '{_input_only_spectra} --latent_size {latent_size} ' +
+    '{_input_without_params} --latent_size {latent_size} ' +
     '--encoder_hidden_layer_sizes {encoder_hidden_layers} --decoder_hidden_layer_sizes {decoder_hidden_layers} ' +
-    '--discriminator_hidcden_layer_sizes {disc_hidden_layers} ' +
+    '--discriminator_hidden_layer_sizes {disc_hidden_layers} ' +
     '{_batch_norm}{_conv_disc}{_multi_disc}' +
     # Training parameters
     '--epochs {epochs} --lambda_values {lambda_values} {_dynamic_learning}' +
     '--discriminator_learning_rate {lr_disc} --autoencoder_learning_rate {lr_ae} ' +
-    '-vv\n').format(_normalize="--normalize " if args_dict["spectra_normalization"] else "",
+    '-vv\n').format(_normalize="--normalize " if args_dict["X_normalization"] else "",
                    _shuffle="--shuffle " if args_dict["shuffle"] else "",
                    _discretize="--discretize " if args_dict["discretize"] else "",
-                   _input_only_spectra="--input_only_spectra " if args_dict["input_only_spectra"] else "",
+                   _input_without_params="--input_without_params " if args_dict["input_without_params"] else "",
                    _batch_norm="--batch_normalization " if args_dict["batch_norm"] else "",
                    _conv_disc="--convolutional_discriminator " if args_dict["conv_disc"] else "",
                    _multi_disc="--multi_discriminator " if args_dict["multi_disc"] else "",
                    _dynamic_learning="--dynamic_learning {:} {:} ".format(args_dict['dl_no_change'], args_dict['dl_lambda_steps']) if args_dict["dynamic_learning"] else "",
+                   _seed='--seed {:} '.format(args_dict['seed']) if (args_dict['seed'] != 'None') else '',
                    **args_dict)
 
     verbose and print('You can use this command to continue the training using the same settings (or vary some of them):')
@@ -367,8 +368,8 @@ def eval_training(dataset_test, autoencoder, discriminators, verbose=1):
 # ---
 
 # # Results function
-def generate_new_result_row(file_path, model_id, 
-                            survey, dataset_dir, dataset_name,
+def generate_new_result_row(file_path, model_id, root_folder,
+                            data_loader, dataset_dir, dataset_name,
                             dataset_rows, training_shape, test_shape,
                             shuffle, discretize, nbins, 
                             batch_norm, conv_disc, multi_disc,
@@ -376,7 +377,7 @@ def generate_new_result_row(file_path, model_id,
                             model_type, model_description, reconstruction_loss_name, discriminator_loss_name, 
                             opt_name_ae, lr_ae, opt_name_disc, lr_disc, seed,
                             encoder_hidden_layers, decoder_hidden_layers, 
-                            input_only_X, latent_size,
+                            input_without_params, latent_size,
                             disc_hidden_layers, ae_arquitecture, disc_arquitecture, 
                             labels, cond_labels, lambda_values, dynamic_learning, dl_no_change, dl_lambda_steps, 
                             epochs, batch_size,
@@ -389,23 +390,24 @@ def generate_new_result_row(file_path, model_id,
     # if the file doesn't exit... create header
     if not os.path.exists(file_path):
         with open(file_path, 'a') as f:
-            f.write('model_id,survey,dataset_dir,dataset_name,dataset_rows,training_shape,test_shape,shuffle,' +
+            f.write('model_id,root_folder,data_loader,dataset_dir,dataset_name,dataset_rows,training_shape,test_shape,shuffle,' +
                     'discretize,nbins,batch_norm,conv_disc,multi_disc,X_normalization,params_normalization,model_type,' +
                     'model_description,reconstruction_loss_name,discriminator_loss_name,opt_name_ae,lr_ae,opt_name_disc,' +
-                    'lr_disc,seed,input_only_X,latent_size,encoder_hidden_layers,decoder_hidden_layers,' +
+                    'lr_disc,seed,input_without_params,latent_size,encoder_hidden_layers,decoder_hidden_layers,' +
                     'disc_hidden_layers,ae_arquitecture,disc_arquitecture,labels,cond_labels,lambda_values,' +
                     'dynamic_learning,dl_no_change,dl_lambda_steps,epochs,batch_size,reconstruction_loss,' +
                     'discriminator_loss,ae_loss\n')
             
     # Add results row
     with open(file_path, 'a') as f:
-        f.write((num_params_in_csv*'{:},'+'{:}\n').format(model_id, survey, dataset_dir, dataset_name, dataset_rows, 
+        f.write((num_params_in_csv*'{:},'+'{:}\n').format(model_id, os.path.abspath(root_folder), data_loader, 
+                                                          os.path.abspath(dataset_dir), dataset_name, dataset_rows, 
                                                           training_shape, test_shape, shuffle, discretize, nbins, 
                                                           batch_norm, conv_disc, multi_disc, X_normalization, 
                                                           params_normalization, model_type, model_description, 
                                                           reconstruction_loss_name, discriminator_loss_name, 
                                                           opt_name_ae, lr_ae, opt_name_disc, lr_disc, seed, 
-                                                          input_only_X, latent_size, '"'+str(encoder_hidden_layers)+'"',
+                                                          input_without_params, latent_size, '"'+str(encoder_hidden_layers)+'"',
                                                           '"'+str(decoder_hidden_layers)+'"', 
                                                           '"'+str(disc_hidden_layers)+'"', 
                                                           ae_arquitecture, disc_arquitecture, labels, cond_labels, 
@@ -425,8 +427,8 @@ def cli():
     parser = argparse.ArgumentParser(prog='train_cli', description='Define and train disentangling models')
 
     # ## Parser arguments
-    parser.add_argument('--survey', type=str,  choices=['sample'], 
-                        help='data source')
+    parser.add_argument('--data_loader', type=str,  default='SampleDataLoader', 
+                        help='name of the data loader class')
     parser.add_argument('--survey_data_path', type=str,
                         help='Path where the data survey is located')
     parser.add_argument('--params', type=str, nargs='+', default=['teff', 'logg'],
@@ -435,7 +437,7 @@ def cli():
                         help='parameters that will be decomposed')
     parser.add_argument('--training_id', '--model_id', type=str,
                         help='model/training id to load a specific training, including data and models. If this parameter is passed, all parameters except the training ones are ignored (currently, is the user who has to pass the same parameters)')
-    parser.add_argument('--get_model_settings', type=str,
+    parser.add_argument('--get_model_settings', type=str, metavar='MODEL_ID',
                         help='return the command line instruction to continue the training of the specified id')    
     parser.add_argument('--root_folder', type=str, default=os.path.dirname(__file__),
                                             help='root folder to save and load data')
@@ -457,7 +459,7 @@ def cli():
                             help='seed to replicate the results')
 
     models_group = parser.add_argument_group('Models parameters')
-    models_group.add_argument('--input_only_spectra', action='store_true',
+    models_group.add_argument('--input_without_params', action='store_true',
                             help='the conditional parameters are only passed to latent space')
     models_group.add_argument('--latent_size', type=int, default=25,
                             help='size of the latent space in the autoencoder')
@@ -493,14 +495,12 @@ def cli():
     args = parser.parse_args()
 
     # ## Check essential parameters
-    if args.survey is None:
-        if args.get_model_settings is None:
-            raise ValueError("You must provide a survey or use the 'get_model_settings' option")
-        else:
-            get_model_command_line(model_id=args.get_model_settings,
-                                results_file_path=RESULTS_FILE_PATH,
-                                verbose=args.verbose)
-            sys.exit(0)
+    if args.get_model_settings:
+        ROOT_FOLDER = args.root_folder
+        get_model_command_line(model_id=args.get_model_settings,
+                               results_file_path=RESULTS_FILE_PATH,
+                               verbose=args.verbose)
+        sys.exit(0)
 
     if (not args.multi_disc) and (len(args.lambda_values) != 1):
         raise ValueError("The number of lambdas must be match with the number of discriminators. To use several lambdas use the '--multi_disc' parameter")
@@ -509,13 +509,13 @@ def cli():
     VERBOSE = args.verbose
     ROOT_FOLDER = args.root_folder
 
-    SURVEY = args.survey
+    DATA_LOADER = args.data_loader
     MODEL_ID = args.training_id
     SURVEY_DATA_PATH = args.survey_data_path
     LABELS = args.params
     COND_LABELS = args.cond_params
     VERBOSE and print('Training id: {:}'.format(MODEL_ID), end='\n\n')
-    VERBOSE and print('Survey: {:}'.format(SURVEY), end='\n\n')
+    VERBOSE and print('Data loader: {:}'.format(DATA_LOADER), end='\n\n')
     VERBOSE and print('Survey data path: {:}'.format(SURVEY_DATA_PATH))
     VERBOSE and print('Parameters: {:}'.format(LABELS))
     VERBOSE and print('Conditional parameters: {:}'.format(COND_LABELS), end='\n\n')
@@ -536,7 +536,7 @@ def cli():
     VERBOSE and print('Seed value: {:}'.format(SEED))
 
     PARAMS_DIM = len(COND_LABELS) 
-    INPUT_ONLY_X = args.input_only_spectra
+    INPUT_WITHOUT_PARAMS = args.input_without_params
     LATENT_SIZE = args.latent_size
     ENCODER_HIDDEN_LAYER_SIZES = args.encoder_hidden_layer_sizes
     DECODER_HIDDEN_LAYER_SIZES = args.decoder_hidden_layer_sizes
@@ -547,7 +547,7 @@ def cli():
     SUMMARY_MODELS = args.summary_models
     VERBOSE and print('Model parameters')
     VERBOSE and print('----------------')
-    VERBOSE and print('Input only spectra: {:}'.format(INPUT_ONLY_X))
+    VERBOSE and print('Input without params: {:}'.format(INPUT_WITHOUT_PARAMS))
     VERBOSE and print('Latent size: {:}'.format(LATENT_SIZE))
     VERBOSE and print('Size of hidden layers of the encoder: {:}'.format(ENCODER_HIDDEN_LAYER_SIZES))
     VERBOSE and print('Size of hidden layers of the decoder: {:}'.format(DECODER_HIDDEN_LAYER_SIZES))
@@ -580,15 +580,15 @@ def cli():
     VERBOSE and print('Autoencoder learning rate: {:}'.format(LR_AE))
 
     # # Data
-    VERBOSE and print('\nBuilding datasets', end='')
-    dataLoader = DataLoaderFactory().create_dataloader(survey=SURVEY, dataset_path=SURVEY_DATA_PATH, params=LABELS, 
+    VERBOSE and print('\nBuilding datasets...')
+    dataLoader = DataLoaderFactory().create_dataloader(data_loader=DATA_LOADER, dataset_path=SURVEY_DATA_PATH, params=LABELS, 
                                                     conditional_params=COND_LABELS, normalize=NORMALIZE_SPECTRA, shuffle=SHUFFLE, 
-                                                    discretize=DISCRETIZE, nbins=NBINS, random_state=SEED)
+                                                    discretize=DISCRETIZE, nbins=NBINS, random_state=SEED, verbose=VERBOSE)
                                 
     # Get train and test tensorflow datasets
     dataset_train, dataset_test = dataLoader.create_tf_dataset(batch=BATCH_SIZE,
                                                             multi_discriminator=MULTI_DISC)
-    VERBOSE and print('. Done')
+    VERBOSE and print('Done')
 
     # Get input/outpout dimensions from datasets
     DATA_DIM = dataset_train.element_spec[0].shape[1]
@@ -630,7 +630,7 @@ def cli():
                                             latent_dim=LATENT_SIZE,
                                             hidden_layer_sizes=ENCODER_HIDDEN_LAYER_SIZES, 
                                             hidden_layers_activation='relu',
-                                            input_only_spectra=INPUT_ONLY_X,
+                                            input_only_spectra=INPUT_WITHOUT_PARAMS,
                                             batch_norm=BATCH_NORM,
                                             verbose=SUMMARY_MODELS)
 
@@ -672,7 +672,7 @@ def cli():
         SUMMARY_MODELS and print('Models built')
     else:
         model_id = MODEL_ID
-        autoencoder, disc_models_dict = my_utils.load_models(model_id=model_id, verbose=VERBOSE)
+        autoencoder, disc_models_dict = my_utils.load_models(model_id=model_id, model_path=os.path.join(ROOT_FOLDER, 'results/models'), verbose=VERBOSE)
         encoder = autoencoder.get_layer('encoder')
         decoder = autoencoder.get_layer('decoder')
 
@@ -780,7 +780,7 @@ def cli():
     # ae_loss already defined
 
 
-    generate_new_result_row(file_path=RESULTS_FILE_PATH, model_id=model_id, survey=SURVEY, dataset_dir=dataset_dir, 
+    generate_new_result_row(file_path=RESULTS_FILE_PATH, model_id=model_id, root_folder=ROOT_FOLDER, data_loader=DATA_LOADER, dataset_dir=dataset_dir, 
                             dataset_name=dataset_name, dataset_rows=dataset_rows, training_shape=training_shape, 
                             test_shape=test_shape, shuffle=SHUFFLE, discretize=DISCRETIZE, nbins=NBINS, 
                             batch_norm=BATCH_NORM, conv_disc=CONV_DISC, multi_disc=MULTI_DISC, 
@@ -789,7 +789,7 @@ def cli():
                             reconstruction_loss_name=loss_reconstruction_name, discriminator_loss_name=loss_disc_name,
                             opt_name_ae=opt_name_ae, lr_ae=LR_AE, opt_name_disc=opt_name_disc, lr_disc=LR_DISC, seed=SEED, 
                             encoder_hidden_layers=encoder_hidden_layers, decoder_hidden_layers=decoder_hidden_layers, 
-                            input_only_X=INPUT_ONLY_X, latent_size=LATENT_SIZE, ae_arquitecture=ae_arquitecture, 
+                            input_without_params=INPUT_WITHOUT_PARAMS, latent_size=LATENT_SIZE, ae_arquitecture=ae_arquitecture, 
                             disc_hidden_layers=disc_hidden_layers, disc_arquitecture=disc_arquitecture, 
                             labels=str(LABELS).replace('[','').replace(']','').replace("'",'').replace(', ','-'),
                             cond_labels=str(COND_LABELS).replace('[','').replace(']','').replace("'",'').replace(', ','-'), 
@@ -801,7 +801,6 @@ def cli():
 
     # ## Save results for visual-autoencoder
     base_folder_path = 'results'
-    model_folder = 'models'
     data_folder = 'data'
 
     data_folder_path = os.path.normpath(os.path.join(ROOT_FOLDER, base_folder_path, data_folder, model_id))

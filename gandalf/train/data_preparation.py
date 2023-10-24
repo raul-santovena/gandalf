@@ -2,6 +2,7 @@
 # coding: utf-8
 
 import os
+import sys
 from typing import Type
 import pandas as pd
 import numpy as np
@@ -62,25 +63,20 @@ class DataLoaderFactory:
     def __init__(self) -> None:
         pass
 
-    def create_dataloader(self, survey, dataset_path, params, conditional_params,
+    def create_dataloader(self, data_loader, dataset_path, params, conditional_params,
                     normalize=True, shuffle=True, discretize=True, nbins=10, 
-                    random_state=None) -> Type[DataLoader]:
-        ''' Return a DataLoader based on the survey parameter'''
-
-        if survey == 'sample':
-            return SampleDataLoader(data_path=dataset_path, normalize_X=normalize, shuffle=shuffle, 
-                                    discretize=discretize, nbins=nbins, params=params, 
-                                    conditioned_params=conditional_params,
-                                    random_state=random_state)
-        # elif survey == 'survey_example':
-        #     return SurveyExampleDataLoader(normalize_spectra=normalize, data_path=dataset_path,
-        #                                    shuffle=shuffle, 
-        #                                    discretize=discretize, nbins=nbins, 
-        #                                    params=params, 
-        #                                    conditioned_params=conditional_params,
-        #                                    random_state=random_state)
-        else:
-            return SampleDataLoader(normalize_X=normalize, shuffle=shuffle, discretize=discretize,
+                    random_state=None, verbose=0) -> Type[DataLoader]:
+        ''' Return a DataLoader based on the data_loader parameter using dynamic instantiation'''
+        try:
+            dataLoader = globals()[data_loader]
+            verbose and print("Using the '{:}' class to prepare the datasets.".format(data_loader))
+            return dataLoader(data_path=dataset_path, normalize_X=normalize, shuffle=shuffle, 
+                              discretize=discretize, nbins=nbins, params=params, 
+                              conditioned_params=conditional_params,
+                              random_state=random_state)
+        except:
+            verbose and print("The '{:}' class does not exist in data_preparation.py. Using the default class 'SampleDataLoader'.".format(data_loader))
+            return SampleDataLoader(data_path=dataset_path, normalize_X=normalize, shuffle=shuffle, discretize=discretize,
                                     nbins=nbins, params=params, conditioned_params=conditional_params,
                                     random_state=random_state)
 

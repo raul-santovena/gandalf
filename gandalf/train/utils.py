@@ -71,7 +71,7 @@ def load_models(model_id, model_path='results/models', verbose=0):
     model_id : str
         Model identifier
     model_path : str, default 'results/models'
-        Ruta de la carpeta donde se guarda el modelo
+        Path of the folder where the model is saved
     verbose : int, default 0
         Verbose
     '''
