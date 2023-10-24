@@ -19,7 +19,7 @@ from bokeh.io import export_png
 
 import argparse
 
-sys.path.append('../../gandalf') # To support the use of the tool without packaging
+sys.path.append(os.path.join(os.path.dirname(__file__), os.path.normpath('../../'))) # To support the use of the tool without packaging
 import gandalf.train.utils as my_utils
 
 # import warnings filter

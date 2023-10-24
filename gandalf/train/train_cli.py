@@ -14,7 +14,7 @@ from inspect import signature
 import argparse
 
 # My modules
-sys.path.append('../../gandalf') # To support the use of the tool without packaging
+sys.path.append(os.path.join(os.path.dirname(__file__), os.path.normpath('../../'))) # To support the use of the tool without packaging
 import gandalf.train.models as my_models
 import gandalf.train.utils as my_utils
 from gandalf.train.data_preparation import DataLoaderFactory
