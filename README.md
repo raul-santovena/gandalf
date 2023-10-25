@@ -35,7 +35,7 @@ All the dependencies used in this project will also be installed:
 ```
 python -m build
 
-pip install .\dist\gandalf-1.0.0-py3-none-any.whl 
+pip install .\dist\gandalf-2.0.0-py3-none-any.whl 
 ```
 
 Then you can use the cli tools installed simply calling them:
@@ -47,22 +47,23 @@ test_cli --help
 
 The installation will also include the dataset located in `gandalf/train/data/sample`, so that you can carry out a verification test easily. For instance:
 ```
-train_cli --survey sample --epochs 5 -vv
+train_cli --epochs 5 -vv
 test_cli <generated_model_id> --tsne_comparison
 ```
 
 Note that the sample dataset it just for testing purposes.
 
-You also can work with GANDALF without the need of the packaging process. Use [requirements.txt](requirements.txt) to install all the dependencies with `pip`. You can work with `train_cli` and `test_cli` also as scripts. This has been tested using python 3.7.
-
+You also can work with GANDALF without the need of the packaging process. Use [requirements.txt](requirements.txt) to install all the dependencies with `pip`. You can work with `train_cli` and `test_cli` also as scripts. 
 ```
 pip install -r requirements.txt
 ```
 
 ```
-python gandalf/train/train_cli.py --survey sample --epochs 5 -vv
+python gandalf/train/train_cli.py --epochs 5 -vv
 python gandalf/train/test_cli.py <generated_model_id> --tsne_comparison
 ```
+
+NOTE: This has been tested using python 3.7.
 
 ## More detail
 To see in more depth how each of them works, consult the README of each module:
