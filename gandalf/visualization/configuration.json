@@ -3,6 +3,7 @@
         "model_name": "CAE",
         "model_id": "20231016_131604",
         "base_dir": "../train/results",
+        "export_folder": "generated_samples",
         "X_filename": "X_test.npy",
         "params_filename": "params_test.npy",
         "cond_params_filename": "cond_params_test.npy",

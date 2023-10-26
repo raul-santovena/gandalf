@@ -207,6 +207,9 @@ for _cond_param_name in cond_params_names:
 
     sliders_cond_params_dict[_cond_param_name] = _slider
 
+### Export button
+export_button = Button(label='Generate sample', button_type='success', align='end',
+                       width=150, height=30, sizing_mode='fixed', margin=(5,40,5,5), disabled=True)
 
 # Figures
 ## Plot original spectrum
@@ -403,6 +406,8 @@ def get_spectra():
             if is_conditional:
                 for _label in cond_params_names:
                     sliders_cond_params_dict[_label].value = float(params_selected[_label])
+            # Enable export button
+            export_button.disabled=False
     else:
         return
 
@@ -432,6 +437,10 @@ def id_select_callback(attr, old, new):
         # Empty figures
         X_source.data = get_empty_X_source()
         z_source.data = get_empty_z_source()
+
+        # Disable export button
+        export_button.disabled=True
+
         return
 
     _df = df[df.ids == new]
@@ -466,6 +475,10 @@ def param_select_callback(select_obj, attr, old, new):
         # Empty figures
         X_source.data = get_empty_X_source()
         z_source.data = get_empty_z_source()
+        
+        # Disable export button
+        export_button.disabled=True
+
         return
 
     _df = df[(df.ids == id_selected) & (df['original_'+_current_param_name] == new)]
@@ -522,6 +535,32 @@ def on_pan(event: Pan):
 
     X_source.data['generated_X'] = _generated_X[0]
 
+def generate_sample():
+    if id_selected != '-':
+        _params_str = str()
+        
+        # Add values of no cond params
+        _no_cond_params_labels = np.array(params_names)[~np.isin(params_names, cond_params_names)]
+        for _no_cond_params_label in _no_cond_params_labels:
+            _params_str += '_' + _no_cond_params_label + '_' + str(selects_y_dict[_no_cond_params_label].value)
+
+        # Add values of cond params
+        for _cond_param_name in cond_params_names:
+            _params_str += '_' + _cond_param_name + '_' + str(sliders_cond_params_dict[_cond_param_name].value)
+
+        # Create folder if it does not exist
+        _export_folder = os.path.join(FILE_PATH,
+                                      load_configuration_data()['export_folder'])
+        
+        if not os.path.exists(_export_folder):
+            os.makedirs(_export_folder)
+
+        _filename = '{:}{:}'.format(id_selected, _params_str.replace('.', '_'))
+        _filepath = os.path.join(_export_folder, _filename)
+        # Save generated datum
+        np.save(_filepath, 
+                X_source.data['generated_X'])
+
 ## Linking callbacks
 ### Search text and header selects
 search_text_input.on_change('value', search_callback)
@@ -553,12 +592,15 @@ reset_button.on_click(get_spectra)
 z_source.selected.on_change('indices', modify_slider_callback)
 f2.on_event('pan', on_pan)
 
+### Export button
+export_button.on_click(generate_sample)
+
 #######################
 
 # Layout definition #
 layout_ = column(row([search_text_input, ids_select] + list(selects_y_dict.values()), sizing_mode='scale_width'),
                  row(f1, sizing_mode='stretch_both'),
                  row(column([z_slider] + list(sliders_cond_params_dict.values()) + [reset_button], sizing_mode='stretch_height'), f2, sizing_mode='stretch_both'), 
-                 f3, sizing_mode='stretch_both')
+                 f3, export_button, sizing_mode='stretch_both')
 
 curdoc().add_root(layout_)
