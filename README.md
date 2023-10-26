@@ -1,5 +1,7 @@
-# Generative Adversarial Networks for Disentangling And Learning Framework (GANDALF)
+![GANDALF icon](docs/logo.png)
+# Generative Adversarial Networks for Disentangling And Learning Framework (GANDALF) 
 GANDALF is an ad-hoc framework written in Python to define, train, test and visualize disentangling models. It is divided into two modules. The [train](gandalf/train/) module, where you can define, train and test different models, and the [visualization](gandalf/visualization) folder, a bokeh server who display a representation of the model, allowing not just its visualization, but also interactions to understand how it works.
+
 
 The project is structured as follow:
 ```
