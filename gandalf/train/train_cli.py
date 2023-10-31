@@ -311,6 +311,34 @@ def train(dataset, model_id=None, epochs=100,
 # ---
 
 # # Test functions
+def test_step(x, y, *y_discs, lambda_dict):
+    '''Get model losses'''
+
+    # Obtaining latent space and autoencoder reconstruction
+    z = encoder([x, y], training=False)
+    output_ae = decoder([z, y], training=False)
+
+    # Autoencoder reconstruction error calculation
+    loss_reconstruction = loss_fn_reconstruction(x, output_ae)
+    # Partial autoencoder error calculation
+    loss_ae = loss_reconstruction 
+
+    # Obtaining the prediction of each discriminator and its error
+    loss_disc_dict = dict()
+    for (disc_name, discriminator), y_disc in zip(disc_models_dict.items(), y_discs):
+        # Obtaining discriminator predictions
+        output_disc = discriminator(z if not CONV_DISC else z[:,:,np.newaxis], training=False)
+
+        # Discrimnator error calculation
+        loss_disc_dict[disc_name] = loss_fn_disc(y_disc, output_disc)
+
+        # Calculation of the total error of the autoencoder applying the error of each discriminator to perform the adversarial training
+        _weighted_lambda = lambda_dict[disc_name.replace('_discriminator','')] if MULTI_DISC else list(lambda_dict.values())[0]
+        _loss_disc = -loss_disc_dict[disc_name]
+        loss_ae += _weighted_lambda*_loss_disc
+        
+    return loss_reconstruction, loss_ae, loss_disc_dict
+
 def eval_training(dataset_test, autoencoder, discriminators, verbose=1):
     '''Evaluation using the test dataset
     
@@ -327,44 +355,38 @@ def eval_training(dataset_test, autoencoder, discriminators, verbose=1):
     '''
     verbose and print('\nTest results')
     verbose and print('------------')
+
+    # Metric definitions
+    _loss_reconstruction_metric = tf.keras.metrics.Mean('loss_reconstruction', dtype=tf.float32)
+    _loss_ae_metric = tf.keras.metrics.Mean('loss_ae', dtype=tf.float32)
+    _loss_disc_metric_dict = dict()
+    for _key in disc_models_dict.keys():
+        _loss_disc_metric_dict[_key] = tf.keras.metrics.Mean('loss_disc_{:}'.format(_key), dtype=tf.float32)
     
-    # Data is extracted form the test dataset
-    _X_test = np.concatenate([x for x, *_ in dataset_test], axis=0)
-    _y_test = np.concatenate([y for _, y, *_ in dataset_test], axis=0)
-    _y_test_encoded_list = np.concatenate([y_encoded for _, _, *y_encoded in dataset_test], axis=1)
-    
-    # Autoencoder reconstruction and autoencoder error (partial)
-    _ae_reconstructions = autoencoder([_X_test, _y_test], training=False)
-    _reconstruction_loss = loss_fn_reconstruction(_X_test, _ae_reconstructions)
-    _ae_loss = _reconstruction_loss
-    
-    # We get the latent space
-    _z = autoencoder.get_layer('encoder')([_X_test, _y_test], training=False)
-    
-    # Predictions and errors of the discriminators and final calculation of the autoencoder error
-    _n_discs = len(discriminators.keys())
-    _disc_loss_mean = 0
-    for (_disc_name, _discriminator), _y_test_encoded in zip(discriminators.items(), _y_test_encoded_list if DISCRETIZE else _y_test):
-        # Discriminator error
-        _disc_predictions = _discriminator(_z, training=False)
-        _disc_loss = loss_fn_disc(_y_test_encoded, _disc_predictions)
-        verbose and print("{:}: {:f}".format(_disc_name, _disc_loss))
-        _disc_loss_mean += _disc_loss
-        
-        # Calculation of the total error of the autoencoder applying the error of the discriminator
-        _weighted_lambda = LAMBDA_DICT[_disc_name.replace('_discriminator','')]  if MULTI_DISC else list(LAMBDA_DICT.values())[0]
-        _disc_loss = -_disc_loss
-        _ae_loss += _weighted_lambda*_disc_loss
-    _disc_loss_mean /= _n_discs
-        
+    # Batch test error calculation
+    for x_batch_test, y_batch_test, *y_batch_test_encoded_list in dataset_test:
+        loss_reconstruction, loss_ae, loss_disc_dict = test_step(x_batch_test, 
+                                                                 y_batch_test, 
+                                                                 *y_batch_test_encoded_list if DISCRETIZE else y_batch_test, 
+                                                                 lambda_dict=LAMBDA_DICT)
+        # Error metrics are updated
+        _loss_reconstruction_metric.update_state(loss_reconstruction)
+        _loss_ae_metric.update_state(loss_ae)
+        for _key in disc_models_dict.keys():
+            _loss_disc_metric_dict[_key].update_state(loss_disc_dict[_key])
         
     
     # Final results
-    verbose and print('Mean discriminator loss: {:f}'.format(_disc_loss_mean))
-    verbose and print('\nReconstruction loss: {:f}'.format(_reconstruction_loss))
-    verbose and print('Autoencoder loss: {:f}'.format(_ae_loss))
+    verbose and print('\nReconstruction loss: {:f}'.format(_loss_reconstruction_metric.result()))
+
+    _loss_disc_mean = 0
+    for _key in disc_models_dict.keys():
+        _loss_disc_mean += _loss_disc_metric_dict[_key].result()
+        verbose and print('{:} loss: {:f}'.format(_key, _loss_disc_metric_dict[_key].result()))
+    _loss_disc_mean /= len(disc_models_dict)
+    verbose and print('Autoencoder loss: {:f}'.format(_loss_ae_metric.result()))
     
-    return _ae_loss.numpy(), _reconstruction_loss.numpy(), _disc_loss_mean.numpy()
+    return _loss_ae_metric.result(), _loss_reconstruction_metric.result(), _loss_disc_mean
 # ---
 
 # # Results function
