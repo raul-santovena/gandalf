@@ -747,10 +747,10 @@ def cli():
     X_test = np.concatenate([x for x, *_ in dataset_test], axis=0)
     cond_params_train = np.concatenate([y for _, y, *_ in dataset_train], axis=0)
     cond_params_test = np.concatenate([y for _, y, *_ in dataset_test], axis=0)
-    z_train = autoencoder.get_layer('encoder')([X_train, cond_params_train], training=False)
-    z_test = autoencoder.get_layer('encoder')([X_test, cond_params_test], training=False)
-    decoded_train = autoencoder([X_train, cond_params_train], training=False)
-    decoded_test = autoencoder([X_test, cond_params_test], training=False)
+    z_train = np.concatenate([autoencoder.get_layer('encoder')([x, y], training=False).numpy() for x, y, *_ in dataset_train])
+    z_test = np.concatenate([autoencoder.get_layer('encoder')([x, y], training=False).numpy() for x, y, *_ in dataset_test])
+    decoded_train = np.concatenate([autoencoder([x, y], training=False).numpy() for x, y, *_ in dataset_train])
+    decoded_test = np.concatenate([autoencoder([x, y], training=False).numpy() for x, y, *_ in dataset_test])
 
 
     # model_id already defined
