@@ -301,11 +301,15 @@ def train(dataset, model_id=None, epochs=100,
     # At the end, the model is saved
     if saved_model_path is not None:
         _model_folder_path = os.path.normpath(os.path.join(ROOT_FOLDER, saved_model_path, model_id))
-        ae_model_save_path = os.path.join(_model_folder_path, "autoencoder")
+        # Create folder if doesn't exist
+        if not os.path.exists(_model_folder_path):
+            print('\nCreating model folder in \'{:}\''.format(os.path.abspath(_model_folder_path)))
+            os.makedirs(_model_folder_path)
+        ae_model_save_path = os.path.abspath(os.path.join(_model_folder_path, "autoencoder.keras"))
         autoencoder.save(ae_model_save_path)
         # All discriminator are saved
         for _name, _discriminator in disc_models_dict.items():
-            _disc_model_save_path = os.path.join(_model_folder_path, _name)
+            _disc_model_save_path = os.path.join(_model_folder_path, _name + '.keras')
             _discriminator.save(_disc_model_save_path)    
         verbose and print('\nSaving models at {}'.format(os.path.abspath(_model_folder_path)), end='\n\n')
 # ---

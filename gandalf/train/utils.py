@@ -79,7 +79,7 @@ def load_models(model_id, model_path='results/models', verbose=0):
     verbose and print('Loading models from {:}... '.format(os.path.normpath(os.path.join(model_path, model_id))))
     
     # Autoencoder
-    _ae_path = os.path.join(model_path, model_id, 'autoencoder')
+    _ae_path = glob.glob(os.path.join(model_path, model_id, 'autoencoder*'))[0]
     _autoencoder = tf.keras.models.load_model(_ae_path, compile=False)
     verbose and print("Model '{:}' loaded".format(os.path.basename(_ae_path)))
     
@@ -89,7 +89,7 @@ def load_models(model_id, model_path='results/models', verbose=0):
         
     for _disc_path in _disc_paths:
         _model_name = os.path.basename(_disc_path)
-        _discriminator_dict[_model_name] = tf.keras.models.load_model(_disc_path, compile=False)
+        _discriminator_dict[_model_name.replace('.keras','')] = tf.keras.models.load_model(_disc_path, compile=False)
         verbose and print("Model '{:}' loaded".format(_model_name))
     
     return _autoencoder, _discriminator_dict
