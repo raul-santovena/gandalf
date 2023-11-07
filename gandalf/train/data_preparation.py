@@ -253,7 +253,7 @@ class SampleDataLoader(DataLoader):
         _y = _params_normalized
             
         # Discretization and One-hot encoding
-        _y_encoded_list = self.__discretize_and_encode_params(_params_normalized, nbins=self.nbins,
+        _y_encoded_list = self.__discretize_and_encode_params(self.conditioned_params, nbins=self.nbins,
                                                               multi_discriminator=multi_discriminator)
 
         # Train/Test split
