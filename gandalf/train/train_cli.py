@@ -6,6 +6,7 @@ import os
 import time
 import numpy as np
 import pandas as pd
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' # To display TF INFO and WARNING messages change to '0'
 import tensorflow as tf
 import sys
 import datetime
@@ -708,8 +709,13 @@ def cli():
     VERBOSE and print('\nThe training/model id is', model_id)
 
     # ## Optimizers
-    optimizer_disc = tf.keras.optimizers.Adam(learning_rate=LR_DISC)
-    optimizer_ae = tf.keras.optimizers.Adam(learning_rate=LR_AE)
+    v_major = int(tf.__version__.split('.')[1])
+    if v_major < 11:
+        optimizer_disc = tf.keras.optimizers.Adam(learning_rate=LR_DISC)
+        optimizer_ae = tf.keras.optimizers.Adam(learning_rate=LR_AE)
+    else:
+        optimizer_disc = tf.keras.optimizers.legacy.Adam(learning_rate=LR_DISC)
+        optimizer_ae = tf.keras.optimizers.legacy.Adam(learning_rate=LR_AE)
 
     # ## Checkpoints
     checkpoint_path = os.path.join(ROOT_FOLDER, 'checkpoints', 'train', model_id)
