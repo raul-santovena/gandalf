@@ -30,7 +30,7 @@ tf.keras.backend.set_floatx('float64')
 
 # # Global variables
 RESULTS_FILE_PATH = 'results/results.csv'
-encoder = decoder = autoencoder = disc_models_dict = loss_fn_reconstruction = loss_fn_disc = optimizer_ae = optimizer_disc = ckpt = ckpt_manager = ROOT_FOLDER = MULTI_DISC = CONV_DISC = LAMBDA_DICT = COND_LABELS = DISCRETIZE = None
+encoder = decoder = autoencoder = disc_models_dict = loss_fn_reconstruction = loss_fn_disc = optimizer_ae = optimizer_disc = ckpt = ckpt_manager = ROOT_FOLDER = MULTI_DISC = CONV_DISC = LAMBDA_DICT = COND_LABELS = DISCRETIZE = INPUT_WITHOUT_PARAMS = None
 
 
 # # Utils
@@ -97,7 +97,7 @@ def get_model_command_line(model_id, results_file_path, verbose=0):
 def train_step(x, y, *y_discs, lambda_dict):
     with tf.GradientTape() as tape_ae, tf.GradientTape(persistent=True) as tape_disc:
         # Obtaining latent space and autoencoder reconstruction
-        z = encoder([x, y], training=True)
+        z = encoder(x, training=True) if INPUT_WITHOUT_PARAMS else encoder([x, y], training=True)
         output_ae = decoder([z, y], training=True)
 
         # Autoencoder reconstruction error calculation
@@ -320,7 +320,7 @@ def test_step(x, y, *y_discs, lambda_dict):
     '''Get model losses'''
 
     # Obtaining latent space and autoencoder reconstruction
-    z = encoder([x, y], training=False)
+    z = encoder(x, training=False) if INPUT_WITHOUT_PARAMS else encoder([x, y], training=False)
     output_ae = decoder([z, y], training=False)
 
     # Autoencoder reconstruction error calculation
@@ -447,7 +447,7 @@ def generate_new_result_row(file_path, model_id, root_folder,
 
 def cli():
     global encoder, decoder, autoencoder, disc_models_dict, loss_fn_reconstruction, loss_fn_disc, optimizer_ae 
-    global optimizer_disc, ckpt, ckpt_manager, ROOT_FOLDER, MULTI_DISC, CONV_DISC, LAMBDA_DICT, COND_LABELS, DISCRETIZE
+    global optimizer_disc, ckpt, ckpt_manager, ROOT_FOLDER, MULTI_DISC, CONV_DISC, LAMBDA_DICT, COND_LABELS, DISCRETIZE, INPUT_WITHOUT_PARAMS
 
     # # Parser
     # ## Parser definition
@@ -657,7 +657,7 @@ def cli():
                                             latent_dim=LATENT_SIZE,
                                             hidden_layer_sizes=ENCODER_HIDDEN_LAYER_SIZES, 
                                             hidden_layers_activation='relu',
-                                            input_only_spectra=INPUT_WITHOUT_PARAMS,
+                                            input_without_params=INPUT_WITHOUT_PARAMS,
                                             batch_norm=BATCH_NORM,
                                             verbose=SUMMARY_MODELS)
 
@@ -674,7 +674,8 @@ def cli():
         autoencoder = my_models.make_autoencoder_model(data_dim=DATA_DIM, params_dim=PARAMS_DIM,
                                                     latent_dim=LATENT_SIZE, 
                                                     encoder=encoder, 
-                                                    decoder=decoder)
+                                                    decoder=decoder,
+                                                    input_without_params=INPUT_WITHOUT_PARAMS)
 
         
         if MULTI_DISC:
@@ -757,8 +758,12 @@ def cli():
     X_test = np.concatenate([x for x, *_ in dataset_test], axis=0)
     cond_params_train = np.concatenate([y for _, y, *_ in dataset_train], axis=0)
     cond_params_test = np.concatenate([y for _, y, *_ in dataset_test], axis=0)
-    z_train = np.concatenate([autoencoder.get_layer('encoder')([x, y], training=False).numpy() for x, y, *_ in dataset_train])
-    z_test = np.concatenate([autoencoder.get_layer('encoder')([x, y], training=False).numpy() for x, y, *_ in dataset_test])
+    if INPUT_WITHOUT_PARAMS:
+        z_train = np.concatenate([autoencoder.get_layer('encoder')(x, training=False).numpy() for x, y, *_ in dataset_train])
+        z_test = np.concatenate([autoencoder.get_layer('encoder')(x, training=False).numpy() for x, y, *_ in dataset_test])
+    else:
+        z_train = np.concatenate([autoencoder.get_layer('encoder')([x, y], training=False).numpy() for x, y, *_ in dataset_train])
+        z_test = np.concatenate([autoencoder.get_layer('encoder')([x, y], training=False).numpy() for x, y, *_ in dataset_test])
     decoded_train = np.concatenate([autoencoder([x, y], training=False).numpy() for x, y, *_ in dataset_train])
     decoded_test = np.concatenate([autoencoder([x, y], training=False).numpy() for x, y, *_ in dataset_test])
 

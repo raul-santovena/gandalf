@@ -3,7 +3,7 @@ from tensorflow.keras import layers
 
 def make_encoder_model(data_dim, params_dim, latent_dim, hidden_layer_sizes=[512, 256], 
                        hidden_layers_activation='relu', output_activation='sigmoid',
-                       input_only_spectra=False,
+                       input_without_params=False,
                        batch_norm=False, verbose=False):
     '''Create the encoder tensorflow model
     
@@ -21,6 +21,12 @@ def make_encoder_model(data_dim, params_dim, latent_dim, hidden_layer_sizes=[512
     hidden_layer_sizes : list, length = n_layers - 2, default=[512, 256]
         The ith element represents the number of neurons in the ith hidden layer
 
+    output_activation : str, default 'sigmoid
+        Output activation function
+
+    input_without_params : bool, default False
+        If True, params are not passed to the model
+
     batch_norm : bool, default False
         If True, a normalization is added between each hidden layer
 
@@ -29,7 +35,7 @@ def make_encoder_model(data_dim, params_dim, latent_dim, hidden_layer_sizes=[512
     input_data = layers.Input(shape=(data_dim,))
     input_labels = layers.Input(shape=params_dim)
 
-    if input_only_spectra:
+    if input_without_params:
         x = input_data
     else:
         x = layers.concatenate([input_data, input_labels])
@@ -40,7 +46,7 @@ def make_encoder_model(data_dim, params_dim, latent_dim, hidden_layer_sizes=[512
             x = layers.BatchNormalization()(x)
     x = layers.Dense(latent_dim, activation=output_activation)(x)
     
-    model = tf.keras.Model(inputs=[input_data] if input_only_spectra else [input_data, input_labels], 
+    model = tf.keras.Model(inputs=[input_data] if input_without_params else [input_data, input_labels], 
                            outputs=x,
                            name='encoder')
     
@@ -96,7 +102,7 @@ def make_decoder_model(params_dim, latent_dim, data_dim, hidden_layer_sizes=[256
     return model
 
 
-def make_autoencoder_model(data_dim, params_dim, latent_dim, encoder=None, decoder=None):
+def make_autoencoder_model(data_dim, params_dim, latent_dim, encoder=None, decoder=None, input_without_params=False):
     '''Create the autoencoder tensorflow model
     
     Parameters
@@ -115,11 +121,15 @@ def make_autoencoder_model(data_dim, params_dim, latent_dim, encoder=None, decod
         
     decoder : tf.keras.Model, default None
         Decoder tensorflow model, if not specified, one is created by default
+        
+    input_without_params : bool, default False
+        If True, params are not passed to the model
     '''
     
     # If an encoder and/or a decoder is not passed, they are created with the default parameters
     if encoder is None:
-        _encoder = make_encoder_model(data_dim=data_dim, params_dim=params_dim, latent_dim=latent_dim)
+        _encoder = make_encoder_model(data_dim=data_dim, params_dim=params_dim, latent_dim=latent_dim,
+                                      input_without_params=input_without_params)
     else:
         _encoder = encoder
         
@@ -131,7 +141,7 @@ def make_autoencoder_model(data_dim, params_dim, latent_dim, encoder=None, decod
     input_data = layers.Input(shape=(data_dim,))
     input_labels = layers.Input(shape=(params_dim,))
     
-    z = _encoder([input_data, input_labels])
+    z = _encoder(input_data) if input_without_params else _encoder([input_data, input_labels])
     x = _decoder([z, input_labels])
     ae = tf.keras.Model(inputs=[input_data, input_labels], outputs=x, 
                            name='autoencoder')
