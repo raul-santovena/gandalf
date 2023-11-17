@@ -1,4 +1,4 @@
-from glob import glob
+import glob
 import os
 import numpy as np
 import pandas as pd
@@ -106,7 +106,7 @@ def load_model():
 
     _base_dir = os.path.normpath(_config_dict['base_dir'])
     _model_id = _config_dict['model_id']
-    _full_model_path = os.path.join(FILE_PATH, _base_dir, 'models', _model_id, 'autoencoder')
+    _full_model_path = glob.glob(os.path.join(FILE_PATH, _base_dir, 'models', _model_id, 'autoencoder*'))[0]
 
     return tf.keras.models.load_model(filepath=_full_model_path)
 
@@ -138,7 +138,8 @@ X_scaler, param_scaler = load_scalers()
 # A dictionary is created for the original parameters with their unique values
 unique_original_dict = dict()
 for _param_name in params_names:
-    unique_original_dict[_param_name] = np.unique(df['original_' + _param_name]).tolist()
+    _rounded_param = [round(float(_param), 2) for _param in df['original_' + _param_name].values]
+    unique_original_dict[_param_name] = np.unique(_rounded_param).tolist()
 
 unique_ids = np.unique(df.ids).tolist()
 
