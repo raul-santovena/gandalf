@@ -582,7 +582,7 @@ def models_comparison(model_ids, model_names=None, iterations=1250, repetitions=
     
     _width = WIDTH
     for model_id, model_name in zip(model_ids, model_names):
-        # Se obtiene información sobre el modelo del csv de resultados
+        # Information about the model is obtained from the results csv
         _results_df = pd.read_csv(os.path.join(ROOT_FOLDER, 'results/results.csv'))
         _rows_df = _results_df.loc[_results_df.model_id == model_id, ['discretize',
                                                                        'nbins',
@@ -623,7 +623,7 @@ def cli():
     parser.add_argument('--seed', type=int,
                         help='Value to replicate the results')
     parser.add_argument('--root_folder', type=str, default=os.path.dirname(__file__),
-                                            help='root folder to save and load data')
+                        help='root folder to save and load data')
     parser.add_argument('-v', '--verbose', action='store_true',
                         help='verbosity')
 

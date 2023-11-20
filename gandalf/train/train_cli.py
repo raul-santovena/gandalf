@@ -464,11 +464,11 @@ def cli():
     parser.add_argument('--get_model_settings', '--get_model_config', type=str, metavar='MODEL_ID',
                         help='return the command line instruction to continue the training of the specified id')    
     parser.add_argument('--root_folder', type=str, default=os.path.dirname(__file__),
-                                            help='root folder to save and load data')
+                        help='root folder to save and load data')
     parser.add_argument('--update_json', action='store_true',
                         help="updates the attribute 'model_id' of the visualization tool configuration file")
     parser.add_argument('-v', '--verbose', action='count', default=0,
-                             help='verbose')                    
+                        help='verbose')                    
 
     data_group = parser.add_argument_group('Data parameters')
     data_group.add_argument('--normalize', action='store_true',
@@ -486,23 +486,23 @@ def cli():
 
     models_group = parser.add_argument_group('Models parameters')
     models_group.add_argument('--input_without_params', action='store_true',
-                            help='the conditional parameters are only passed to latent space')
+                              help='the conditional parameters are only passed to latent space')
     models_group.add_argument('--latent_size', type=int, default=25,
-                            help='size of the latent space in the autoencoder')
+                              help='size of the latent space in the autoencoder')
     models_group.add_argument('--encoder_hidden_layer_sizes', type=int, nargs='*', default=[512, 256], metavar='N',
-                            help='The ith element represents the number of neurons in the ith hidden layer')
+                              help='The ith element represents the number of neurons in the ith hidden layer')
     models_group.add_argument('--decoder_hidden_layer_sizes', type=int, nargs='*', default=[256, 512], metavar='N',
-                            help='The ith element represents the number of neurons in the ith hidden layer')
+                              help='The ith element represents the number of neurons in the ith hidden layer')
     models_group.add_argument('--discriminator_hidden_layer_sizes', type=int, nargs='*', default=[64, 32], metavar='N',
-                            help='The ith element represents the number of neurons in the ith hidden layer')
+                              help='The ith element represents the number of neurons in the ith hidden layer')
     models_group.add_argument('--batch_normalization', '--batch_norm', action='store_true',
-                            help='Add batch normalization between layers to both autoencoder and discriminators')
+                              help='Add batch normalization between layers to both autoencoder and discriminators')
     models_group.add_argument('--convolutional_discriminator', '--conv_disc', action='store_true',
-                            help='make a convolutional discriminator instead of regular ann layers')
+                              help='make a convolutional discriminator instead of regular ann layers')
     models_group.add_argument('--multi_disc', '--multi_discriminator', action='store_true',
-                            help='create an architecture with a discriminator per conditional parameter')
+                              help='create an architecture with a discriminator per conditional parameter')
     models_group.add_argument('--summary_models', '--summary', action='store_true',
-                            help='print the summary of the models')
+                              help='print the summary of the models')
 
     training_group = parser.add_argument_group('Training parameters')
     training_group.add_argument('--epochs', type=int, default=200,
@@ -583,7 +583,6 @@ def cli():
     VERBOSE and print('Convolutional discriminator: {:}'.format(CONV_DISC))
     VERBOSE and print('Multi-discriminators: {:}'.format(MULTI_DISC))
     VERBOSE and print('Summary of the models: {:}'.format(SUMMARY_MODELS), end='\n\n')
-
 
     EPOCHS = args.epochs
     BATCH_SIZE = args.batch_size
