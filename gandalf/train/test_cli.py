@@ -632,28 +632,28 @@ def cli():
                             help='run all tests. If this parameter is passed, the remain parameters are ignored')
     test_group.add_argument('--tsne_comparison', action='store_true',
                             help='comparison of spectra and latent space using the tsne algorithm')
-    test_group.add_argument('--conditional_parameters_analysis', action='store_true',
+    test_group.add_argument('--conditional_parameters_analysis', '--cond_params_analysis', action='store_true',
                             help='analyze the result of predict the conditional parameters from the spectra vs from the latent space')
-    test_group.add_argument('--no_conditional_parameters_analysis', action='store_true',
+    test_group.add_argument('--no_conditional_parameters_analysis', '--no_cond_params_analysis', action='store_true',
                             help='analyze the result of predict no conditional parameters from the spectra vs from the latent space')
     test_group.add_argument('--models_comparison', action='store_true',
                             help='compare a list of models')
 
-    test_parameters_group = parser.add_argument_group('Test parameters')
-    test_parameters_group.add_argument('--repetitions', type=int, default=1,
-                                    help='Repetition of each training in cond and non-cond parameter analysis')
-    test_parameters_group.add_argument('--mlp_max_iter', type=int, default=600,
-                                        help='Maximun number of iterations of used MLPs. Default 600 iterations')
-    test_parameters_group.add_argument('--x_hidden_layer_sizes', type=int, nargs='*', default=[200, 100], metavar='N',
-                            help='The ith element represents the number of neurons in the ith hidden layer')
-    test_parameters_group.add_argument('--z_hidden_layer_sizes', type=int, nargs='*', default=[200, 100], metavar='N',
-                            help='The ith element represents the number of neurons in the ith hidden layer')
-    test_parameters_group.add_argument('--latex_format', action='store_true',
-                                    help='generate results in latex table format')
+    param_analysis_group = parser.add_argument_group('Parameters analysis options')
+    param_analysis_group.add_argument('--repetitions', type=int, default=1,
+                                      help='Repetition of each training in cond and non-cond parameter analysis')
+    param_analysis_group.add_argument('--mlp_max_iter', type=int, default=600,
+                                      help='Maximun number of iterations of used MLPs. Default 600 iterations')
+    param_analysis_group.add_argument('--x_hidden_layer_sizes', type=int, nargs='*', default=[200, 100], metavar='N',
+                                      help='The ith element represents the number of neurons in the ith hidden layer')
+    param_analysis_group.add_argument('--z_hidden_layer_sizes', type=int, nargs='*', default=[200, 100], metavar='N',
+                                      help='The ith element represents the number of neurons in the ith hidden layer')
+    param_analysis_group.add_argument('--latex_format', action='store_true',
+                                      help='generate results in latex table format')
 
-    tsne_parameters_group = parser.add_argument_group('Tsne parameters')                                    
-    tsne_parameters_group.add_argument('--export_graph', action='store_true',
-                                    help='Export a png graph with the comparisons')                                
+    tsne_group = parser.add_argument_group('Tsne options')                                    
+    tsne_group.add_argument('--export_graph', action='store_true',
+                            help='Export a png graph with the comparisons')                                
 
     # ## Running the parser
     args = parser.parse_args()

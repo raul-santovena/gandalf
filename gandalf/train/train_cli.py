@@ -222,7 +222,7 @@ def train(dataset, model_id=None, epochs=100,
         
         time_start = time.time()
         # Batches
-        for step, (x_batch_train, y_batch_train, *y_batch_train_encoded_list) in enumerate(dataset):
+        for (x_batch_train, y_batch_train, *y_batch_train_encoded_list) in dataset:
             
             # Training
             loss_reconstruction, loss_ae, loss_disc_dict = train_step(x_batch_train,
@@ -345,17 +345,13 @@ def test_step(x, y, *y_discs, lambda_dict):
         
     return loss_reconstruction, loss_ae, loss_disc_dict
 
-def eval_training(dataset_test, autoencoder, discriminators, verbose=1):
+def eval_training(dataset_test, verbose=1):
     '''Evaluation using the test dataset
     
     Parameters
     ----------
     dataset_test : Tensorflow.Dataset
         Test dataset
-    autoencoder : Tensorflow.Model
-        Autoencoder model
-    discriminators : Tensorflow.Model dict
-        Dict with the discriminators
     verbose : bool, default True
         Verbosity mode
     '''
@@ -459,13 +455,13 @@ def cli():
                         help='name of the data loader class')
     parser.add_argument('--survey_data_path', type=str,
                         help='Path where the data survey is located')
-    parser.add_argument('--params', type=str, nargs='+', default=['teff', 'logg'],
+    parser.add_argument('--params', '--parameters', type=str, nargs='+', default=['teff', 'logg'],
                         help='parameters contained in the data')
-    parser.add_argument('--cond_params', type=str, nargs='+', default=['teff'],
+    parser.add_argument('--cond_params', '--conditional_parameters', type=str, nargs='+', default=['teff'],
                         help='parameters that will be decomposed')
     parser.add_argument('--training_id', '--model_id', type=str,
                         help='model/training id to load a specific training, including data and models. If this parameter is passed, all parameters except the training ones are ignored (currently, is the user who has to pass the same parameters)')
-    parser.add_argument('--get_model_settings', type=str, metavar='MODEL_ID',
+    parser.add_argument('--get_model_settings', '--get_model_config', type=str, metavar='MODEL_ID',
                         help='return the command line instruction to continue the training of the specified id')    
     parser.add_argument('--root_folder', type=str, default=os.path.dirname(__file__),
                                             help='root folder to save and load data')
@@ -481,7 +477,7 @@ def cli():
                             help='shuffle data before the dataset is created')
     data_group.add_argument('--discretize', action='store_true',
                             help='discretizes the conditional parameters into bins for training')
-    data_group.add_argument('--nbins', type=int, default=10, 
+    data_group.add_argument('--nbins', '--n_bins', type=int, default=10, 
                             help='number of bins')
     data_group.add_argument('--batch_size', type=int, default=50, 
                             help='batch size')
