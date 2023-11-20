@@ -13,6 +13,7 @@ import datetime
 from pickle import dump
 from inspect import signature
 import argparse
+import json
 
 # My modules
 sys.path.append(os.path.join(os.path.dirname(__file__), os.path.normpath('../../'))) # To support the use of the tool without packaging
@@ -468,6 +469,8 @@ def cli():
                         help='return the command line instruction to continue the training of the specified id')    
     parser.add_argument('--root_folder', type=str, default=os.path.dirname(__file__),
                                             help='root folder to save and load data')
+    parser.add_argument('--update_json', action='store_true',
+                        help="updates the attribute 'model_id' of the visualization tool configuration file")
     parser.add_argument('-v', '--verbose', action='count', default=0,
                              help='verbose')                    
 
@@ -541,12 +544,13 @@ def cli():
     SURVEY_DATA_PATH = args.survey_data_path
     LABELS = args.params
     COND_LABELS = args.cond_params
+    UPDATE_JSON = args.update_json
     VERBOSE and print('Training id: {:}'.format(MODEL_ID), end='\n\n')
     VERBOSE and print('Data loader: {:}'.format(DATA_LOADER), end='\n\n')
     VERBOSE and print('Survey data path: {:}'.format(SURVEY_DATA_PATH))
     VERBOSE and print('Parameters: {:}'.format(LABELS))
-    VERBOSE and print('Conditional parameters: {:}'.format(COND_LABELS), end='\n\n')
-
+    VERBOSE and print('Conditional parameters: {:}'.format(COND_LABELS), end='\n')
+    VERBOSE and print('Update json: {:}'.format(UPDATE_JSON), end='\n\n')
 
     NORMALIZE_SPECTRA = args.normalize
     SHUFFLE = args.shuffle
@@ -872,6 +876,17 @@ def cli():
     # Saving scalers
     dump(dataLoader.get_scaler_X() if NORMALIZE_SPECTRA else None, open(os.path.join(data_folder_path, 'X_scaler.pkl'), 'wb'))
     dump(dataLoader.get_scaler_params(), open(os.path.join(data_folder_path, 'param_scaler.pkl'), 'wb'))
+
+    # Update json
+    if UPDATE_JSON:
+        _json_path = os.path.join(ROOT_FOLDER, '..', 'visualization', 'configuration.json')
+        with open(_json_path, 'r') as jsonfile:
+            _config_data = json.load(jsonfile)
+        
+        _config_data['model']['model_id'] = model_id
+
+        with open(_json_path, 'w') as jsonfile:
+            json.dump(_config_data, jsonfile, indent=4)
 
 if __name__ == '__main__':
     cli()
