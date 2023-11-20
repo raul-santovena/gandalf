@@ -743,8 +743,6 @@ def cli():
 
     # # Test
     ae_loss, reconstruction_loss, disc_loss = eval_training(dataset_test=dataset_test, 
-                                                            autoencoder=autoencoder, 
-                                                            discriminators=disc_models_dict,
                                                             verbose=True)
     # ---
 
