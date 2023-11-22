@@ -482,7 +482,13 @@ def param_select_callback(select_obj, attr, old, new):
 
         return
 
-    _df = df[(df.ids == id_selected) & (df['original_'+_current_param_name] == new)]
+    _df = df[(df.ids == id_selected)] 
+    
+    # Filter the dataframe based on the values of the parameters already selected
+    for _key, _param_selected in params_selected.items():
+        if (_param_selected == '-'):
+            continue
+        _df = _df[_df['original_' + _key] == _param_selected]
 
     
     # For each original parameter other than the selected one, the values of its select are updated
