@@ -1,22 +1,23 @@
 [project]
 name = "gandalf"
 
-version = "2.3.1"
+version = "4.0.0"
 
 description = "Generative Adversarial Networks for Disentangling and Learning Framework"
 
 readme = "README.md"
 
-requires-python = ">=3.7"
+requires-python = ">=3.9"
 
-license = {file = "LICENSE.txt"}
+license-files = ["LICENSE.txt"]
 
 authors = [
-  {name = "Raúl Santoveña Gómez", email = "santovena.raul@gmail.com" } 
+  {name = "Raúl Santoveña Gómez", email = "santovena.raul@gmail.com" }
 ]
 
 maintainers = [
-  {name = "Raúl Santoveña Gómez", email = "santovena.raul@gmail.com" } 
+  {name = "Raúl Santoveña Gómez", email = "santovena.raul@gmail.com" },
+  {name = "Ángel Regueiro Feal", email = "a.regueiro.feal@udc.es" }
 ]
 
 dependencies = [
@@ -25,20 +26,20 @@ dependencies = [
   "scikit-learn",
   "tensorflow",
   "bokeh",
-  "selenium"
+  "selenium",
+  "jsonschema"
 ]
 
-[project.urls]  
+[project.urls]
 "Homepage" = "https://github.com/raul-santovena/gandalf"
 
-[project.scripts]  
+[project.scripts]
 train_cli = "gandalf.train.train_cli:cli"
 test_cli = "gandalf.train.test_cli:cli"
 delete_cli = "gandalf.train.delete_cli:cli"
 
 [tool.setuptools]
-packages = ["gandalf.train"]
-package-data = {"gandalf.train" = ["data/sample/*.npy"]}
+packages = ["gandalf", "gandalf.test", "gandalf.utils", "gandalf.train_adapter", "gandalf.train_adapter.utils", "gandalf.train", "gandalf.visualization"]
 
 [build-system]
 requires = ["setuptools>=43.0.0", "wheel"]
