@@ -1,0 +1,8 @@
+model:
+  model_name: "CAE"
+  model_id: "sample"
+  base_dir: "experiments-results/results/"
+  export_folder: "generated_samples"
+
+info:
+  version: 1.0
