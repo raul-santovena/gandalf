@@ -1,35 +1,10 @@
-import pandas as pd
 import argparse
-import shutil
+import sys
 import os
 
-CHECKPOINT_PATH = 'checkpoints/train/'
-LOGS_PATH = 'logs/fit/'
-RESULTS_DATA_PATH = 'results/data/'
-MODELS_PATH = 'results/models/'
-TEST_TSNE_PATH = 'tests/tsne/'
-PATHS = [CHECKPOINT_PATH, LOGS_PATH, RESULTS_DATA_PATH, MODELS_PATH, TEST_TSNE_PATH]
-
-RESULTS_CSV_PATH = 'results/results.csv'
-
-def delete_experiment(id, root_folder):
-    print("-----------------------------------")
-    print("Deleting experiment with id: ", id)
-
-    dirs = [os.path.normpath(os.path.join(root_folder, path, id)) for path in PATHS]
-
-    for directory in dirs:
-        if not os.path.exists(directory):
-            print(f"Directory {directory} does not exist")
-        else:
-            print(f"Deleting {directory}...")
-            shutil.rmtree(directory)
-
-    print("Deleting row from results.csv...\n")
-    results_csv_full_path = os.path.join(root_folder, RESULTS_CSV_PATH)
-    results = pd.read_csv(results_csv_full_path)
-    results = results[results.model_id != id]
-    results.to_csv(results_csv_full_path, index=False)
+# My modules
+sys.path.append(os.path.join(os.path.dirname(__file__), os.path.normpath('../../'))) # To support the use of the tool without packaging
+from gandalf.utils.delete_experiment import delete_experiment
 
 def cli():
     parser = argparse.ArgumentParser(prog='delete_cli', description='Delete files attached to a experiment id')
@@ -37,19 +12,28 @@ def cli():
     parser.add_argument('ids', metavar='id', type=str, nargs='+',
                     help='experiment ids to delete')
     parser.add_argument('--root_folder', type=str, default=os.path.dirname(__file__),
-                        help='root folder where to search for experiments')
-    
+                        help='root folder where to search for experiments (default: current directory)')
+    parser.add_argument('--force', action='store_true',
+                        help='force deletion even if experiment_id is not in results.csv')
+
     args = parser.parse_args()
     ids = args.ids
     root_folder = args.root_folder
+    force = args.force
 
-    print("Deleting experiments: ", ids)
-    print("")
+    print(f"Target Root Folder: {root_folder}")
+    print(f"Experiment IDs to Delete: {', '.join(ids)}")
+    print(f"Force Mode: {'Enabled' if args.force else 'Disabled'}")
+    print("===================================\n")
+
+    if not os.path.isdir(root_folder):
+        print(f"Error: The specified root folder does not exist or is not a directory: '{root_folder}'")
+        sys.exit(1)
 
     for id in ids:
-        delete_experiment(id, os.path.normpath(root_folder))
+        delete_experiment(id, os.path.normpath(root_folder), force=force)
 
-    print("Done!")
+    print("All specified experiment IDs have been processed.")
 
 if __name__ == "__main__":
     cli()
