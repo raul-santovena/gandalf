@@ -211,10 +211,10 @@ def train(dataset, model_id=None, epochs=100,
             print("\nEpoch", real_epoch, end='\r')
             
         # Error metrics are reset
-        epoch_loss_ae_mean.reset_states()
+        epoch_loss_ae_mean.reset_state()
         for _key in disc_models_dict.keys():
-            epoch_loss_disc_mean_dict[_key].reset_states()
-        epoch_loss_reconstruction_mean.reset_states()
+            epoch_loss_disc_mean_dict[_key].reset_state()
+        epoch_loss_reconstruction_mean.reset_state()
 
         # Unimproved iteration marker is created (dynamic_learning)
         if dynamic_learning:
@@ -709,13 +709,8 @@ def cli():
     VERBOSE and print('\nThe training/model id is', model_id)
 
     # ## Optimizers
-    v_major = int(tf.__version__.split('.')[1])
-    if v_major < 11:
-        optimizer_disc = tf.keras.optimizers.Adam(learning_rate=LR_DISC)
-        optimizer_ae = tf.keras.optimizers.Adam(learning_rate=LR_AE)
-    else:
-        optimizer_disc = tf.keras.optimizers.legacy.Adam(learning_rate=LR_DISC)
-        optimizer_ae = tf.keras.optimizers.legacy.Adam(learning_rate=LR_AE)
+    optimizer_disc = tf.keras.optimizers.Adam(learning_rate=LR_DISC)
+    optimizer_ae = tf.keras.optimizers.Adam(learning_rate=LR_AE)
 
     # ## Checkpoints
     checkpoint_path = os.path.join(ROOT_FOLDER, 'checkpoints', 'train', model_id)

@@ -33,7 +33,7 @@ def make_encoder_model(data_dim, params_dim, latent_dim, hidden_layer_sizes=[512
     verbose : bool, default True
     '''
     input_data = layers.Input(shape=(data_dim,))
-    input_labels = layers.Input(shape=params_dim)
+    input_labels = layers.Input(shape=(params_dim,))
 
     if input_without_params:
         x = input_data
@@ -172,9 +172,9 @@ def make_discriminator(latent_dim, nbins, hidden_layer_sizes=[64, 32],
     model = tf.keras.Sequential(name='discriminator')
     # If it is convolutional, an extra dimension is added
     if not convolutional:
-        model.add(layers.InputLayer(input_shape=(latent_dim,)))
+        model.add(layers.InputLayer(shape=(latent_dim,)))
     else:
-        model.add(layers.InputLayer(input_shape=(latent_dim, 1)))
+        model.add(layers.InputLayer(shape=(latent_dim, 1)))
 
     # Add as many hidden layers as indicated        
     for hidden_layer_size in hidden_layer_sizes:
