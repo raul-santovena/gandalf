@@ -1,0 +1,2 @@
+include gandalf/train_adapter/schemas/config.json
+include gandalf/visualization/static/favicon.ico
