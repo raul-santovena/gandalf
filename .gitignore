@@ -1,0 +1,17 @@
+.venv*
+__pycache__
+.ipynb_checkpoints
+environment.lock
+
+# Gandalf results
+experiments-results
+checkpoints
+logs
+results
+tests
+*.html
+
+# Packaging
+gandalf.egg-info
+build
+dist
