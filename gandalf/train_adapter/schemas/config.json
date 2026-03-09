@@ -1,0 +1,160 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": ["null", "string"],
+        "description": "Experiment ID. If empty, a unique ID will be generated."
+      },
+      "root_folder": {
+        "type": "string",
+        "description": "Root folder for saving experiment data."
+      },
+      "data": {
+        "type": "object",
+        "properties": {
+          "data_loader": {
+            "type": "string"
+          },
+          "survey_data_path": {
+            "type": "string"
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "cond_labels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "normalize_spectra": {
+            "type": "boolean"
+          },
+          "shuffle": {
+            "type": "boolean"
+          },
+          "discretize": {
+            "type": "boolean"
+          },
+          "nbins": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "seed": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "data_loader",
+          "survey_data_path",
+          "labels",
+          "cond_labels",
+          "normalize_spectra",
+          "shuffle",
+          "discretize",
+          "nbins",
+          "seed"
+        ]
+      },
+      "models": {
+        "type": "object",
+        "properties": {
+          "encoder_hidden_layer_sizes": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "decoder_hidden_layer_sizes": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "latent_size": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "input_without_params": {
+            "type": "boolean"
+          },
+          "batch_norm": {
+            "type": "boolean"
+          },
+          "multi_disc": {
+            "type": "boolean"
+          },
+          "disc_hidden_layer_sizes": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "conv_disc": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "encoder_hidden_layer_sizes",
+          "decoder_hidden_layer_sizes",
+          "latent_size",
+          "input_without_params",
+          "batch_norm",
+          "multi_disc",
+          "disc_hidden_layer_sizes",
+          "conv_disc"
+        ]
+      },
+      "train": {
+        "type": "object",
+        "properties": {
+          "epochs": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "batch_size": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "lambda_values": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "lr_disc": {
+            "type": "number"
+          },
+          "lr_ae": {
+            "type": "number"
+          },
+          "dl_no_change": {
+            "type": ["null", "string"],
+            "description": "Dynamic lambda parameters (optional)."
+          },
+          "dl_lambda_steps": {
+            "type": ["null", "string"],
+            "description": "Dynamic lambda steps (optional)."
+          }
+        },
+        "required": [
+          "epochs",
+          "batch_size",
+          "lambda_values",
+          "lr_disc",
+          "lr_ae"
+        ]
+      }
+    },
+    "required": [
+      "id",
+      "root_folder",
+      "data",
+      "models",
+      "train"
+    ]
+  }
