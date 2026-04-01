@@ -75,4 +75,8 @@ def bokeh_server(config_file, port=5006):
     server.start()
 
     server_url = os.getenv('BOKEH_URL', 'http://localhost') # TODO: it is not the Bokeh URL, it is the server URL
-    print(f"Server running at {server_url}:{port}/")
+
+    # If the server URL ends with 'proxy/' it should not add an extra ':'
+    server_url_full = f"{server_url}/{port}" if server_url.endswith('proxy/') else f"{server_url}:{port}"
+
+    print(f"Server running at {server_url_full}")
