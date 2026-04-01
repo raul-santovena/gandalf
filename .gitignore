@@ -2,6 +2,7 @@
 __pycache__
 .ipynb_checkpoints
 environment.lock
+.python-version
 
 # Gandalf results
 experiments-results

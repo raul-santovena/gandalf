@@ -1,7 +1,7 @@
 [project]
 name = "gandalf"
 
-version = "4.0.0"
+version = "4.0.1"
 
 description = "Generative Adversarial Networks for Disentangling and Learning Framework"
 
@@ -25,6 +25,7 @@ dependencies = [
   "pandas",
   "scikit-learn",
   "tensorflow",
+  "tensorboard",
   "bokeh",
   "selenium",
   "jsonschema"
